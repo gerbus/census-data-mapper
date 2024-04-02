@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="Access-Control-Allow-Origin" content="no-cors">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet Polygon Overlay</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+      #map {
+        height: 90vh;
+        width: 75vw;
+      }
+      #controls {
+        height: 90vh;
+        overflow-y: scroll;
+      }
+  </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div id="controls">
+      <select id="select" onchange="handleSelectChange()"></select>
+    </div>
+    <script>
+      var censusData
+      fetch("http://localhost:3000/census-data")
+        .then(response => response.json())
+        .then(data => {
+          var sortedData = data.sort(function(a,b) {
+            if (a["age_0to4_pct"] < b["age_0to4_pct"]) {
+              return -1; // Return -1 if a should come before b
+            }
+            if (a["age_0to4_pct"] > b["age_0to4_pct"]) {
+              return 1; // Return 1 if a should come after b
+            }
+            return 0; // Return 0 if a and b are equal
+          })
+          censusData = sortedData
+          sortedData.forEach(item => {
+            var option = document.createElement('option')
+            option.value = item.ALT_GEO_CODE
+            option.textContent = item.GEO_NAME
+            document.getElementById('select').appendChild(option)
+          });
+        })
+    </script>
+    <script>
+      function handleSelectChange() {
+        // Get the selected value from the select element
+        var selectedValue = document.getElementById('select').value
+        fetch("http://localhost:3000/boundary-data", {
+          method: "POST",
+          body: JSON.stringify({
+            ids: [selectedValue]
+          }),
+          headers: {
+            "Content-type": "application/json; charset=UTF-8"
+          }
+        })
+          .then(response => response.json())
+          .then(data => {
+            var polygon = L.polygon(data[0].coordinates, {
+              color: 'red',
+              fillColor: '#f03',
+              fillOpacity: 0.5
+            }).addTo(map);
+            map.fitBounds(polygon.getBounds());
+          })
+      }
+    </script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Initialize and display the map
+        var map = L.map('map').setView([37.7749, -122.4194], 4); // Center the map at a specific location and set the zoom level
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // function loadPolygonFromJSON(jsonFile) {
+        //   fetch(jsonFile)
+        //     .then(response => response.json())
+        //     .then(data => {
+        //       var polygon = L.polygon(data.coordinates, {
+        //         color: 'red',
+        //         fillColor: '#f03',
+        //         fillOpacity: 0.5
+        //       }).addTo(map);
+        //       map.fitBounds(polygon.getBounds());
+        //     })
+        //     .catch(error => console.error('Error loading JSON:', error));
+        // }
+
+        // // Construct the polygon
+        // var polygon = L.polygon(polygonCoords, {
+        //     color: 'red',
+        //     fillColor: '#f03',
+        //     fillOpacity: 0.5
+        // }).addTo(map);
+
+        // // Fit the map to the bounds of the polygon
+        // map.fitBounds(polygon.getBounds());
+    </script>
+</body>
+</html>

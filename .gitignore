@@ -1,0 +1,10 @@
+node_modules
+data/**/*.zip
+data/**/*.json
+data/**/*.csv
+data/**/*.gml
+data/**/*.xml
+data/**/*.xsd
+data/**/*.txt
+server/assets/*.json
+**/.DS_Store

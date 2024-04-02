@@ -1,0 +1,12 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "main": "server.js",
+  "author": "Christopher X Gerber",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "express": "^4.19.2",
+    "fs": "^0.0.1-security"
+  }
+}
