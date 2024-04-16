@@ -6,100 +6,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leaflet Polygon Overlay</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="loader.css" />
     <style>
       #map {
-        height: 90vh;
+        height: 80vh;
         width: 75vw;
+        display: table-cell;
+      }
+      #map-overlay {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        height: 100%;
+        width: 100%;
+        background-color: white;
+        opacity: 50%;
+        z-index: 900;
+        display: none;
       }
       #controls {
-        height: 90vh;
+        height: 80vh;
         overflow-y: scroll;
+        display: table-cell;
+      }
+      #controls select {
+        display: table-row;
       }
   </style>
 </head>
 <body>
-    <div id="map"></div>
-    <div id="controls">
-      <select id="select" onchange="handleSelectChange()"></select>
+  <script>
+    let censusData = []
+  </script>
+  <div>
+    <div id="map">
+      <div id="map-overlay">
+        <div class="loader">
+          <div class="bar1"></div>
+          <div class="bar2"></div>
+          <div class="bar3"></div>
+          <div class="bar4"></div>
+          <div class="bar5"></div>
+          <div class="bar6"></div>
+        </div>
+      </div>
     </div>
-    <script>
-      var censusData
-      fetch("http://localhost:3000/census-data")
-        .then(response => response.json())
-        .then(data => {
-          var sortedData = data.sort(function(a,b) {
-            if (a["age_0to4_pct"] < b["age_0to4_pct"]) {
-              return -1; // Return -1 if a should come before b
-            }
-            if (a["age_0to4_pct"] > b["age_0to4_pct"]) {
-              return 1; // Return 1 if a should come after b
-            }
-            return 0; // Return 0 if a and b are equal
-          })
-          censusData = sortedData
-          sortedData.forEach(item => {
-            var option = document.createElement('option')
-            option.value = item.ALT_GEO_CODE
-            option.textContent = item.GEO_NAME
-            document.getElementById('select').appendChild(option)
-          });
-        })
-    </script>
-    <script>
-      function handleSelectChange() {
-        // Get the selected value from the select element
-        var selectedValue = document.getElementById('select').value
-        fetch("http://localhost:3000/boundary-data", {
-          method: "POST",
-          body: JSON.stringify({
-            ids: [selectedValue]
-          }),
-          headers: {
-            "Content-type": "application/json; charset=UTF-8"
-          }
-        })
-          .then(response => response.json())
-          .then(data => {
-            var polygon = L.polygon(data[0].coordinates, {
-              color: 'red',
-              fillColor: '#f03',
-              fillOpacity: 0.5
-            }).addTo(map);
-            map.fitBounds(polygon.getBounds());
-          })
-      }
-    </script>
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script>
-        // Initialize and display the map
-        var map = L.map('map').setView([37.7749, -122.4194], 4); // Center the map at a specific location and set the zoom level
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
+    <div id="controls">
+      <span>Metrics</span>
+      <select id="metrics" onchange="handleParamsChange(censusData)" multiple size="14"></select>
+      <span>Divisions</span>
+      <select id="census-divisions" onchange="handleParamsChange(censusData)" multiple size="10"></select>
+      <span>Percentile</span>
+      <select id="result-size" onchange="handleParamsChange(censusData)" size="6">
+        <option value="1">Top 1%</option>
+        <option value="5">Top 5%</option>
+        <option value="10">Top 10%</option>
+        <option value="25">Top 25%</option>
+        <option value="50">Top 50%</option>
+        <option value="">All</option>
+      </select>
+      <span>Average Lower-bound</span>
+      <select id="lower-bound" onchange="handleParamsChange(censusData)" size="6">
+        <option value="95">95%+</option>
+        <option value="90">90%+</option>
+        <option value="80">80%+</option>
+        <option value="70">70%+</option>
+        <option value="60">60%+</option>
+        <option value="">Any</option>
+      </select>
+      <hr />
+      <span>Results (<span id="location-count"></span>)</span>
+      <select id="location" onchange="handleLocationChange()" size="10"></select>
+      <button onclick="handleButtonClick()" id="submit">Show on Map</button>
+    </div>
+  </div>
 
-        // function loadPolygonFromJSON(jsonFile) {
-        //   fetch(jsonFile)
-        //     .then(response => response.json())
-        //     .then(data => {
-        //       var polygon = L.polygon(data.coordinates, {
-        //         color: 'red',
-        //         fillColor: '#f03',
-        //         fillOpacity: 0.5
-        //       }).addTo(map);
-        //       map.fitBounds(polygon.getBounds());
-        //     })
-        //     .catch(error => console.error('Error loading JSON:', error));
-        // }
-
-        // // Construct the polygon
-        // var polygon = L.polygon(polygonCoords, {
-        //     color: 'red',
-        //     fillColor: '#f03',
-        //     fillOpacity: 0.5
-        // }).addTo(map);
-
-        // // Fit the map to the bounds of the polygon
-        // map.fitBounds(polygon.getBounds());
-    </script>
+  <script src="index.js"></script>
+  <script>
+    async function main() {
+      censusData = await getCensusData()
+      populateMetricsSelect(censusData, 'metrics')
+      populateCensusDivisionsSelect(censusData, 'census-divisions')
+    }
+    main()
+  </script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+      // Initialize and display the map
+      var map = L.map('map').setView([53.9, -122.7], 5); // Center the map at a specific location and set the zoom level
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+  </script>
 </body>
 </html>
