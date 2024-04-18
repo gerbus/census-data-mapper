@@ -1,16 +1,36 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path')
+const compression = require("compression")
+const helmet = require("helmet")
+const RateLimit = require("express-rate-limit");
+const limiter = RateLimit({     // Set up rate limiter: maximum of twenty requests per minute
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 20,
+});
 
 const app = express();
-const PORT = 3000;
+const PORT = parseInt(process.env.PORT,10) || 3000;
 
 // Sample JSON file path (replace with the path to your JSON file)
 const boundaryDataFilePath = 'assets/canada-census-2021-boundary-data.json';
 const censusDerivedDataFilePath = 'assets/canada-census-2021-bc-derived.json';
 
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            "script-src": ["'self'", "unpkg.com"],
+        },
+    }),
+)
+
+// Apply rate limiter to all requests
+app.use(limiter);
+
 // Middleware to parse JSON request body
 app.use(express.json());
+
+app.use(compression()); // Compress all routes
 
 // Middleware to serve assets
 app.use(express.static(__dirname + '/assets'))
