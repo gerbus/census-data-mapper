@@ -10,6 +10,17 @@ User to be able to filter out DAs that are on a First Nations Reservation
 (optional) User should be able to filter results by regional districts (census sub-division)
 */
 
+let censusData = []
+let map
+async function main() {
+  censusData = await getCensusData()
+  populateMetricsSelect(censusData, 'metrics')
+  populateCensusDivisionsSelect(censusData, 'census-divisions')
+  initiatlizeMap()
+}
+main()
+
+// Data functions
 async function getCensusData() {
   const censusData = await fetch("http://localhost:3000/census-data").then(response => response.json())
   return censusData
@@ -87,6 +98,7 @@ function populateLocationsSelect(data, selectElementId) {
   document.getElementById("location-count").textContent = data.length
 }
 
+// Handler functions
 function handleParamsChange(data) {
   // Only care about Dissemination Areas
   const dataDAs = data.filter(item => item.GEO_LEVEL === "Dissemination area")
@@ -141,6 +153,14 @@ function handleButtonClick() {
   highlightGeos(ids)
 }
 
+// Display functions
+function initiatlizeMap() {
+  // Initialize and display the map
+  map = L.map('map').setView([53.9, -122.7], 5); // Center and zoom the map to BC
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+}
 function highlightGeos(idsArray) {
   // Display loading animation
   document.getElementById('map-overlay').style.display = "table-cell"

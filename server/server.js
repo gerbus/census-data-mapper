@@ -20,6 +20,8 @@ app.use(
     helmet.contentSecurityPolicy({
         directives: {
             "script-src": ["'self'", "unpkg.com"],
+            "script-src-attr": ["'self'", "'unsafe-inline'"],
+            "img-src": ["'self'", "*.openstreetmap.org"]
         },
     }),
 )
