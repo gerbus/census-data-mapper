@@ -5,11 +5,13 @@
     <meta name="Access-Control-Allow-Origin" content="no-cors">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leaflet Polygon Overlay</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css" integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/grids-responsive-min.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="loader.css" />
     <style>
       #map {
-        height: 80vh;
+        height: 95vh;
         width: 75vw;
         display: table-cell;
       }
@@ -25,17 +27,68 @@
         display: none;
       }
       #controls {
-        height: 80vh;
+        height: 95vh;
+        width: 30vw;
+        padding: 0 1em 1em 1em;
         overflow-y: scroll;
         display: table-cell;
       }
       #controls select {
         display: table-row;
       }
+      #controls label {
+        margin-top: 1em;
+      }
+      #controls #location {
+        height: auto;
+      }
   </style>
 </head>
 <body>
   <div>
+    <form id="controls" class="pure-form pure-form-stacked">
+      <fieldset>
+        <label for="metrics">Select metric(s) to optimize for</label>
+        <select id="metrics" onchange="handleParamsChange(censusData)" multiple size="7"></select>
+        <span class="pure-form-message">Select multiples by command-clicking or control-clicking</span>
+
+        <div class="pure-g">
+          <div class="pure-u-1 pure-u-md-1-2">
+            <label for="result-size">Percentile</label>
+            <select id="result-size" onchange="handleParamsChange(censusData)">
+              <option value="1">Top 1%</option>
+              <option value="5">Top 5%</option>
+              <option value="10">Top 10%</option>
+              <option selected value="25">Top 25%</option>
+              <option value="50">Top 50%</option>
+              <option value="">All</option>
+            </select>
+          </div>
+          <div class="pure-u-1 pure-u-md-1-2">
+            <label for="lower-bound">Metric Lower-bound</label>
+            <select id="lower-bound" onchange="handleParamsChange(censusData)">
+              <option value="95">95%+</option>
+              <option value="90">90%+</option>
+              <option value="80">80%+</option>
+              <option value="70">70%+</option>
+              <option value="60">60%+</option>
+              <option selected value="">Any</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="census-divisions">Filter by division(s) – optional</label>
+        <select id="census-divisions" onchange="handleParamsChange(censusData)" multiple size="7"></select>
+        <span class="pure-form-message">Select multiples by command-clicking or control-clicking</span>
+
+        <hr />
+
+        <label for="location">Results (<span id="location-count"></span>)</label>
+        <select id="location" class="hidden" onchange="handleLocationChange()" size="7"></select>
+
+        <button class="pure-button" id="submit">Show on Map</button>
+      </fieldset>
+    </form>
     <div id="map">
       <div id="map-overlay">
         <div class="loader">
@@ -47,34 +100,6 @@
           <div class="bar6"></div>
         </div>
       </div>
-    </div>
-    <div id="controls">
-      <span>Metrics</span>
-      <select id="metrics" onchange="handleParamsChange(censusData)" multiple size="14"></select>
-      <span>Divisions</span>
-      <select id="census-divisions" onchange="handleParamsChange(censusData)" multiple size="10"></select>
-      <span>Percentile</span>
-      <select id="result-size" onchange="handleParamsChange(censusData)" size="6">
-        <option value="1">Top 1%</option>
-        <option value="5">Top 5%</option>
-        <option value="10">Top 10%</option>
-        <option value="25">Top 25%</option>
-        <option value="50">Top 50%</option>
-        <option value="">All</option>
-      </select>
-      <span>Average Lower-bound</span>
-      <select id="lower-bound" onchange="handleParamsChange(censusData)" size="6">
-        <option value="95">95%+</option>
-        <option value="90">90%+</option>
-        <option value="80">80%+</option>
-        <option value="70">70%+</option>
-        <option value="60">60%+</option>
-        <option value="">Any</option>
-      </select>
-      <hr />
-      <span>Results (<span id="location-count"></span>)</span>
-      <select id="location" onchange="handleLocationChange()" size="10"></select>
-      <button onclick="handleButtonClick()" id="submit">Show on Map</button>
     </div>
   </div>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>

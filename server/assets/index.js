@@ -16,6 +16,7 @@ async function main() {
   censusData = await getCensusData()
   populateMetricsSelect(censusData, 'metrics')
   populateCensusDivisionsSelect(censusData, 'census-divisions')
+  document.getElementById('submit').addEventListener('click', handleButtonClick)
   initiatlizeMap()
 }
 main()
@@ -45,6 +46,22 @@ function sortCensusDataByMetrics(data, metrics) {
   return sortedData
 }
 function populateMetricsSelect(censusData, selectElementId) {
+  const readableMetrics = {
+    age_0to4_pct: "Percent of population aged 0-4",
+    age_5to9_pct: "Percent of population aged 5-9",
+    age_40to44_pct: "Percent of population aged 40-44",
+    housingType_singleDetached_pct: "Percent of dwellings that are 'Single Detached'",
+    householdType_withChildren_pct: "Percent of households that have children",
+    householdIncome_100kPlus_pct: "Percent of households with gross income >$100k",
+    familySize_couplesWithChildren_avg: "Average family size for couples-with-children families",
+    motherTongue_english_pct: "Percent of population with English as mother-tongue",
+    ethnicOrigin_canadian_pct: "Percent of population whose ethnic origin is 'Canadian",
+    ethnicOrigin_dutch_pct: "Percent of population whose ethnic origin is 'Dutch",
+    ethnicOrigin_euro_pct: "Percent of population whose ethnic origin is 'European",
+    religion_buddhist_pct: "Percent of population whose religion is 'Buddhist'",
+    religion_christian_pct: "Percent of population whose religion is 'Christian'",
+    highestDegree_bachelor_pct: "Percent of population who have at least a Bachelor's degree",
+  }
   const keys = Object.keys(censusData[0])
   const selectedKeys = keys.filter(key => {
     const split = key.split("_")
@@ -63,7 +80,7 @@ function populateMetricsSelect(censusData, selectElementId) {
   selectedKeys.forEach(selectedKey => {
     const option = document.createElement('option')
     option.value = selectedKey
-    option.textContent = selectedKey
+    option.textContent = readableMetrics[selectedKey]
     newSelectElement.appendChild(option)
   })
 
@@ -143,7 +160,8 @@ function handleLocationChange() {
   // var selectedValue = document.getElementById('location').value
   // highlightGeos([selectedValue])
 }
-function handleButtonClick() {
+function handleButtonClick(e) {
+  e.preventDefault()
   clearMap()
 
   // Locations are sorted and filtered as controls are adjusted
