@@ -5,6 +5,10 @@
   "author": "Christopher X Gerber",
   "license": "MIT",
   "private": true,
+  "scripts": {
+    "systemd": "/.nvm/versions/node/v16.20.2/bin/node server.js",
+    "start": "node server.js"
+  },
   "dependencies": {
     "compression": "^1.7.4",
     "express": "^4.19.2",
@@ -13,6 +17,6 @@
     "helmet": "^7.1.0"
   },
   "engines": {
-    "node": ">=18.17.0"
+    "node": ">=16.20.2"
   }
 }
