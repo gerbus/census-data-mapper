@@ -9,7 +9,22 @@ User to be able to filter out DAs that are on a First Nations Reservation
 
 (optional) User should be able to filter results by regional districts (census sub-division)
 */
-
+const readableMetrics = {
+  age_0to4_pct: "Probability that neighbours are aged 0-4",
+  age_5to9_pct: "Probability that neighbours are aged 5-9",
+  age_40to44_pct: "Probability that neighbours are aged 40-44",
+  householdType_withChildren_pct: "Probability that neighbourhood households have children",
+  housingType_singleDetached_pct: "Probability that a neighbourhood dwelling is Single Detached",
+  householdIncome_100kPlus_pct: "Probability that neighbourhood households earn >$100k (gross)",
+  familySize_couplesWithChildren_avg: "Average couples-with-children family size in the neighbourhood",
+  motherTongue_english_pct: "Probability that neighbours' mother-tongue is English",
+  ethnicOrigin_canadian_pct: "Probability that neighbours' ethnic origin is 'Canadian",
+  ethnicOrigin_dutch_pct: "Probability that neighbours' ethnic origin is 'Dutch",
+  ethnicOrigin_euro_pct: "Probability that neighbours' ethnic origin is 'European",
+  religion_buddhist_pct: "Probability that neighbours are Buddhist",
+  religion_christian_pct: "Probability that neighbours are Christian",
+  highestDegree_bachelor_pct: "Probability that neighbours have earned a Bachelor's degree",
+}
 let censusData = []
 let map
 async function main() {
@@ -46,25 +61,10 @@ function sortCensusDataByMetrics(data, metrics) {
   return sortedData
 }
 function populateMetricsSelect(censusData, selectElementId) {
-  const readableMetrics = {
-    age_0to4_pct: "Percent of population aged 0-4",
-    age_5to9_pct: "Percent of population aged 5-9",
-    age_40to44_pct: "Percent of population aged 40-44",
-    housingType_singleDetached_pct: "Percent of dwellings that are 'Single Detached'",
-    householdType_withChildren_pct: "Percent of households that have children",
-    householdIncome_100kPlus_pct: "Percent of households with gross income >$100k",
-    familySize_couplesWithChildren_avg: "Average family size for couples-with-children families",
-    motherTongue_english_pct: "Percent of population with English as mother-tongue",
-    ethnicOrigin_canadian_pct: "Percent of population whose ethnic origin is 'Canadian",
-    ethnicOrigin_dutch_pct: "Percent of population whose ethnic origin is 'Dutch",
-    ethnicOrigin_euro_pct: "Percent of population whose ethnic origin is 'European",
-    religion_buddhist_pct: "Percent of population whose religion is 'Buddhist'",
-    religion_christian_pct: "Percent of population whose religion is 'Christian'",
-    highestDegree_bachelor_pct: "Percent of population who have at least a Bachelor's degree",
-  }
   const keys = Object.keys(censusData[0])
   const selectedKeys = keys.filter(key => {
     const split = key.split("_")
+    if (split[0] === "ethnicOrigin") return false
     switch (split[split.length-1]) {
       case "avg":
         return true
@@ -95,7 +95,9 @@ function populateCensusDivisionsSelect(censusData, selectElementId) {
     const option = document.createElement('option')
     option.value = censusDivision
     option.textContent = censusDivision
-    selectElement.appendChild(option)
+    if (censusDivision != null) {
+      selectElement.appendChild(option)
+    }
   })
 }
 function populateLocationsSelect(data, selectElementId) {
@@ -211,7 +213,9 @@ function highlightGeos(idsArray) {
           fillColor: color,
           fillOpacity: 0.3,
           _geo_code: item.dauid
-        }).addTo(map)
+        })
+        .bindTooltip(buildTooltip(item.dauid))
+        .addTo(map)
         polygon.on('mouseover', function(e) {
           console.log(item.dauid)
         })
@@ -221,6 +225,32 @@ function highlightGeos(idsArray) {
     .then(() => {
       document.getElementById('map-overlay').style.display = "none"
     })
+}
+function buildTooltip(dauid) {
+  const da = censusData.find(censusItem => censusItem.ALT_GEO_CODE === dauid)
+
+  // Build a tooltip that shows the relevant metrics plus a bit of meta
+  const tooltipElement = document.getElementById('tooltip').cloneNode(true)
+  tooltipElement.querySelectorAll('.DAID')[0].textContent = `ID: ${dauid}`
+  tooltipElement.querySelectorAll('.division')[0].textContent = `Division: ${da.CENSUS_DIVISION_NAME}`
+
+  // Display selected metrics
+  const selectedMetricsOptions = document.querySelectorAll(`#metrics option:checked`)
+  const metrics = Array.from(selectedMetricsOptions).map(option => option.value)
+  metrics.forEach(metric => {
+    const metricElement = tooltipElement.querySelectorAll('.metric')[0].cloneNode()
+    const metricSplit = metric.split('_')
+    let metricVal = da[metric]
+    if (metricSplit[metricSplit.length-1] === "pct") {
+      metricVal = Math.round(1000 * da[metric])/10 + "%"
+    }
+
+    metricElement.textContent = `${readableMetrics[metric]}: ${metricVal}`
+    tooltipElement.appendChild(metricElement)
+  })
+
+
+  return tooltipElement
 }
 function clearMap() {
   map.eachLayer(function(layer){

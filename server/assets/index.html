@@ -47,6 +47,7 @@
 <body>
   <div>
     <form id="controls" class="pure-form pure-form-stacked">
+      <h2>BC Neighbourhood Finder</h2>
       <fieldset>
         <label for="metrics">Select metric(s) to optimize for</label>
         <select id="metrics" onchange="handleParamsChange(censusData)" multiple size="7"></select>
@@ -57,9 +58,9 @@
             <label for="result-size">Percentile</label>
             <select id="result-size" onchange="handleParamsChange(censusData)">
               <option value="1">Top 1%</option>
-              <option value="5">Top 5%</option>
+              <option selected value="5">Top 5%</option>
               <option value="10">Top 10%</option>
-              <option selected value="25">Top 25%</option>
+              <option value="25">Top 25%</option>
               <option value="50">Top 50%</option>
               <option value="">All</option>
             </select>
@@ -104,5 +105,10 @@
   </div>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="index.js"></script>
+  <div id="tooltip">
+    <div class="DAID"></div>
+    <div class="division"></div>
+    <div class="metric"></div>
+  </div>
 </body>
 </html>
