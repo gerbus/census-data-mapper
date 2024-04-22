@@ -12,7 +12,7 @@
     <style>
       #map {
         height: 95vh;
-        width: 75vw;
+        width: 67vw;
         display: table-cell;
       }
       #map-overlay {
@@ -28,7 +28,7 @@
       }
       #controls {
         height: 95vh;
-        width: 30vw;
+        width: 33vw;
         padding: 0 1em 1em 1em;
         overflow-y: scroll;
         display: table-cell;
@@ -36,11 +36,20 @@
       #controls select {
         display: table-row;
       }
+      #controls #metrics, #controls #census-divisions {
+        display: none;
+      }
       #controls label {
         margin-top: 1em;
       }
       #controls #location {
         height: auto;
+      }
+      #controls .loader {
+        position: relative;
+        transform: none;
+        width: auto;
+        left: 0;
       }
   </style>
 </head>
@@ -50,6 +59,14 @@
       <h2>BC Neighbourhood Finder</h2>
       <fieldset>
         <label for="metrics">Select metric(s) to optimize for</label>
+        <div class="loader" id="metrics-loader">
+          <div class="bar1"></div>
+          <div class="bar2"></div>
+          <div class="bar3"></div>
+          <div class="bar4"></div>
+          <div class="bar5"></div>
+          <div class="bar6"></div>
+        </div>
         <select id="metrics" onchange="handleParamsChange(censusData)" multiple size="7"></select>
         <span class="pure-form-message">Select multiples by command-clicking or control-clicking</span>
 
@@ -65,7 +82,7 @@
               <option value="">All</option>
             </select>
           </div>
-          <div class="pure-u-1 pure-u-md-1-2">
+          <!--div class="pure-u-1 pure-u-md-1-2">
             <label for="lower-bound">Metric Lower-bound</label>
             <select id="lower-bound" onchange="handleParamsChange(censusData)">
               <option value="95">95%+</option>
@@ -75,10 +92,18 @@
               <option value="60">60%+</option>
               <option selected value="">Any</option>
             </select>
-          </div>
+          </div-->
         </div>
 
-        <label for="census-divisions">Filter by division(s) – optional</label>
+        <label for="census-divisions">Only show neighbourhoods in these division(s) – optional</label>
+        <div class="loader" id="census-divisions-loader">
+          <div class="bar1"></div>
+          <div class="bar2"></div>
+          <div class="bar3"></div>
+          <div class="bar4"></div>
+          <div class="bar5"></div>
+          <div class="bar6"></div>
+        </div>
         <select id="census-divisions" onchange="handleParamsChange(censusData)" multiple size="7"></select>
         <span class="pure-form-message">Select multiples by command-clicking or control-clicking</span>
 

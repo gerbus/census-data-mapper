@@ -28,11 +28,11 @@ const readableMetrics = {
 let censusData = []
 let map
 async function main() {
+  initiatlizeMap()
   censusData = await getCensusData()
   populateMetricsSelect(censusData, 'metrics')
   populateCensusDivisionsSelect(censusData, 'census-divisions')
   document.getElementById('submit').addEventListener('click', handleButtonClick)
-  initiatlizeMap()
 }
 main()
 
@@ -86,6 +86,9 @@ function populateMetricsSelect(censusData, selectElementId) {
 
   const parentElement = oldSelectElement.parentNode
   parentElement.replaceChild(newSelectElement, oldSelectElement)
+
+  document.getElementById("metrics").style.display = "table-row"
+  document.getElementById("metrics-loader").style.display = "none"
 }
 function populateCensusDivisionsSelect(censusData, selectElementId) {
   const censusDivisions = [...new Set(censusData.map(item => item.CENSUS_DIVISION_NAME))].sort()
@@ -99,6 +102,9 @@ function populateCensusDivisionsSelect(censusData, selectElementId) {
       selectElement.appendChild(option)
     }
   })
+
+  document.getElementById("census-divisions").style.display = "table-row"
+  document.getElementById("census-divisions-loader").style.display = "none"
 }
 function populateLocationsSelect(data, selectElementId) {
   const oldSelectElement = document.getElementById(selectElementId)
@@ -142,17 +148,18 @@ function handleParamsChange(data) {
   }
 
   // Use lowerbound percentage to segment location list
-  const lowerBound = document.getElementById("lower-bound").value
-  let boundedData = filteredData
-  if (lowerBound !== "") {
-    boundedData = filteredData.filter(item => 100 * item.averageMetrics >= parseInt(lowerBound))
-  }
+  // const lowerBound = document.getElementById("lower-bound").value
+  // let boundedData = filteredData
+  // if (lowerBound !== "") {
+  //   boundedData = filteredData.filter(item => 100 * item.averageMetrics >= parseInt(lowerBound))
+  // }
 
   // Use result size to segment location list
   const numResults = document.getElementById("result-size").value
-  let finalData = boundedData
+  // let finalData = boundedData
+  let finalData = filteredData
   if (numResults !== "") {
-    finalData = filteredData.slice(0,parseInt(boundedData.length * parseInt(numResults) / 100))
+    finalData = filteredData.slice(0,parseInt(filteredData.length * parseInt(numResults) / 100))
   }
 
   populateLocationsSelect(finalData, 'location')
