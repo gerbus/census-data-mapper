@@ -38,7 +38,7 @@ main()
 
 // Data functions
 async function getCensusData() {
-  const censusData = await fetch("http://localhost:3000/census-data").then(response => response.json())
+  const censusData = await fetch("https://neighbourhood.gerbus.ca/census-data").then(response => response.json())
   return censusData
 }
 function sortCensusDataByMetrics(data, metrics) {
@@ -186,7 +186,7 @@ function highlightGeos(idsArray) {
   document.getElementById('map-overlay').style.display = "table-cell"
 
   // Fetch boundary data for ids
-  fetch("http://localhost:3000/boundary-data", {
+  fetch("https://neighbourhood.gerbus.ca/boundary-data", {
     method: "POST",
     body: JSON.stringify({
       ids: idsArray
