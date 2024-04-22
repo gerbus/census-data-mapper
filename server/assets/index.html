@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="Access-Control-Allow-Origin" content="no-cors">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leaflet Polygon Overlay</title>
+    <title>BC Neighbournood Finder (by 2021 census data)</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css" integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/grids-responsive-min.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
@@ -56,7 +56,8 @@
 <body>
   <div>
     <form id="controls" class="pure-form pure-form-stacked">
-      <h2>BC Neighbourhood Finder</h2>
+      <h2 style="margin-bottom: 0">BC Neighbourhood Finder</h2>
+      <small>By 2021 Census Data</small>
       <fieldset>
         <label for="metrics">Select metric(s) to optimize for</label>
         <div class="loader" id="metrics-loader">
