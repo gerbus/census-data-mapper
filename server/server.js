@@ -12,6 +12,8 @@ const limiter = RateLimit({     // Set up rate limiter: maximum of twenty reques
 const app = express();
 const PORT = parseInt(process.env.PORT,10) || 3000;
 
+app.set("trust proxy", true)
+
 // Sample JSON file path (replace with the path to your JSON file)
 const boundaryDataFilePath = 'assets/canada-census-2021-boundary-data.json';
 const censusDerivedDataFilePath = 'assets/canada-census-2021-bc-derived.json';
