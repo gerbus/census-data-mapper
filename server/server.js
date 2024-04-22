@@ -23,7 +23,7 @@ app.use(
         directives: {
             "script-src": ["'self'", "unpkg.com"],
             "script-src-attr": ["'self'", "'unsafe-inline'"],
-            "img-src": ["'self'", "*.openstreetmap.org"]
+            "img-src": ["'self'", "*.openstreetmap.org", "data:"]
         },
     }),
 )
