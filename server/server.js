@@ -1,5 +1,6 @@
 const express = require('express');
 const fs = require('fs');
+const JSONStream = require('JSONStream')
 const path = require('path')
 const compression = require("compression")
 const helmet = require("helmet")
@@ -51,29 +52,33 @@ app.post('/boundary-data', (req, res) => {
 
     // Read the large JSON file
     console.log("/boundary-data: start read")
-    fs.readFile(boundaryDataFilePath, 'utf8', (err, data) => {
-        if (err) {
-            console.error('Error reading JSON file:', err);
-            return res.status(500).json({ error: 'Internal Server Error' });
-        }
+    const stream = fs.createReadStream(boundaryDataFilePath, { encoding: 'utf8' });
+    const parser = JSONStream.parse('*');
 
-        try {
-            // Parse the JSON data
-            console.log("/boundary-data: start parse to json")
-            const jsonData = JSON.parse(data);
+    stream.pipe(parser);
 
-            // Filter objects matching the provided IDs
-            console.log("/boundary-data: start filter json based on params")
-            const matchingObjects = jsonData.filter(obj => ids.includes(obj.dauid));
-
-            // Return the matching objects
-            console.log("/boundary-data: response")
-            res.json(matchingObjects);
-        } catch (error) {
-            console.error('Error parsing JSON:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
+    const matchingObjects = []
+    console.log("/boundary-data: start filter json based on params");
+    parser.on('data', (jsonData) => {
+        // Find objects matching the provided IDs
+        if (ids.includes(jsonData.dauid)) {
+            matchingObjects.push(jsonData)
+            console.log("/boundary-data: found id " + jsonData.dauid)
         }
     });
+    parser.on('error', (err) => {
+        console.error('Error parsing JSON:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    });
+    stream.on('error', (err) => {
+        console.error('Error reading JSON file:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    });
+    stream.on('end', () => {
+        // Return the matching objects
+        console.log("/boundary-data: response");
+        res.json(matchingObjects);
+    })
 });
 app.get('/census-data', (req, res) => {
     res.sendFile(path.join(__dirname, censusDerivedDataFilePath), (err) => {
