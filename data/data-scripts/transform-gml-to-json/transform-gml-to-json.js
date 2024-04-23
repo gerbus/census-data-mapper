@@ -68,21 +68,22 @@ function parseGMLFile(inputFilePath, outputFilePath) {
         console.log("done")
     });
 
-    const jsonData = "[" + data.map(el => JSON.stringify(el)).join(",") + "]"
-    //console.log(jsonData)
-
     // Write
     process.stdout.write("\nWriting JSON...")
     const writeStream = fs.createWriteStream(jsonFilePath)
-    writeStream.write(jsonData, 'utf8', () => {
-        writeStream.end()
-    })
+
+    writeStream.write('[\n', 'utf8')
     writeStream.on('finish', () => {
         console.log("done")
     })
-    writeStream.on('error', err => {
-        console.error('Error writing JSON to file:', err)
+    let commaString = ""
+    data.forEach(item => {
+        writeStream.write(commaString + JSON.stringify(item,null,2), 'utf8')
+        commaString = ",\n"
+        process.stdout.write(".")
     })
+    writeStream.write('\n]', 'utf8')
+    writeStream.end()
 }
 
 
