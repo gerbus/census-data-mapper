@@ -1,6 +1,5 @@
 const express = require('express');
-const fs = require('fs');
-const JSONStream = require('JSONStream')
+const MongoClient = require('mongodb').MongoClient;
 const path = require('path')
 const compression = require("compression")
 const helmet = require("helmet")
@@ -12,11 +11,11 @@ const limiter = RateLimit({     // Set up rate limiter: maximum of twenty reques
 
 const app = express();
 const PORT = parseInt(process.env.PORT,10) || 3000;
+const dbURI = 'mongodb://localhost:27017/neighbourhoodfinder';
 
 app.set("trust proxy", true)
 
 // Sample JSON file path (replace with the path to your JSON file)
-const boundaryDataFilePath = 'assets/canada-census-2021-boundary-data.json';
 const censusDerivedDataFilePath = 'assets/canada-census-2021-bc-derived.json';
 
 app.use(
@@ -50,35 +49,60 @@ app.post('/boundary-data', (req, res) => {
         return res.status(400).json({ error: 'Invalid input. IDs array is missing or not an array.' });
     }
 
-    // Read the large JSON file
+    // Read from DB
     console.log("/boundary-data: start read")
-    const stream = fs.createReadStream(boundaryDataFilePath, { encoding: 'utf8' });
-    const parser = JSONStream.parse('*');
-
-    stream.pipe(parser);
-
-    const matchingObjects = []
-    console.log("/boundary-data: start filter json based on params");
-    parser.on('data', (jsonData) => {
-        // Find objects matching the provided IDs
-        if (ids.includes(jsonData.dauid)) {
-            matchingObjects.push(jsonData)
-            console.log("/boundary-data: found id " + jsonData.dauid)
+    MongoClient.connect(dbURI, (err, client) => {
+        if (err) {
+            console.error('Error connecting to MongoDB:', err);
+            return res.status(500).json({ error: 'Internal Server Error' });
         }
+        console.log('Connected to MongoDB');
+
+        // Fetch objects where 'dauid' field matches the provided IDs
+        const db = client.db('neighbourhoodfinder');
+        const collection = db.collection('boundarydata2021das');
+        collection.find({ dauid: { $in: ids } }).toArray((err, matchingObjects) => {
+            if (err) {
+                console.error('Error fetching objects:', err);
+                return res.status(500).json({ error: 'Internal Server Error' });
+            }
+
+            // Return matching objects
+            res.json(matchingObjects);
+
+            // Close MongoDB connection
+            client.close();
+            console.log('Closed connection to MongoDB');
+        });
     });
-    parser.on('error', (err) => {
-        console.error('Error parsing JSON:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    });
-    stream.on('error', (err) => {
-        console.error('Error reading JSON file:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    });
-    stream.on('end', () => {
-        // Return the matching objects
-        console.log("/boundary-data: response");
-        res.json(matchingObjects);
-    })
+    // const stream = fs.createReadStream(boundaryDataFilePath, { encoding: 'utf8' });
+    // const parser = JSONStream.parse('*');
+
+    // stream.pipe(parser);
+
+    // const matchingObjects = []
+    // console.log("/boundary-data: start filter json based on params");
+    // parser.on('data', (jsonData) => {
+    //     // Find objects matching the provided IDs
+    //     if (ids.includes(jsonData.dauid)) {
+    //         matchingObjects.push(jsonData)
+    //         console.log("/boundary-data: found id " + jsonData.dauid)
+    //     }
+    // });
+    // parser.on('error', (err) => {
+    //     console.error('Error parsing JSON:', err);
+    //     res.status(500).json({ error: 'Internal Server Error' });
+    // });
+    // stream.on('error', (err) => {
+    //     console.error('Error reading JSON file:', err);
+    //     res.status(500).json({ error: 'Internal Server Error' });
+    // });
+    // stream.on('end', () => {
+    //     // Return the matching objects
+    //     console.log("/boundary-data: response");
+    //     res.json(matchingObjects);
+    // })
+
 });
 app.get('/census-data', (req, res) => {
     res.sendFile(path.join(__dirname, censusDerivedDataFilePath), (err) => {
