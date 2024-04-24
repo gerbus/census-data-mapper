@@ -244,10 +244,12 @@ function buildTooltip(dauid) {
   // Display selected metrics
   const selectedMetricsOptions = document.querySelectorAll(`#metrics option:checked`)
   const metrics = Array.from(selectedMetricsOptions).map(option => option.value)
+  let sum = 0.0
   metrics.forEach(metric => {
     const metricElement = tooltipElement.querySelectorAll('.metric')[0].cloneNode()
     const metricSplit = metric.split('_')
     let metricVal = da[metric]
+    sum += metricVal
     if (metricSplit[metricSplit.length-1] === "pct") {
       metricVal = Math.round(1000 * da[metric])/10 + "%"
     }
@@ -256,6 +258,10 @@ function buildTooltip(dauid) {
     tooltipElement.appendChild(metricElement)
   })
 
+  const averageString = Math.round(1000 * sum / metrics.length)/10 + "%"
+  const metricElement = tooltipElement.querySelectorAll('.metric')[0].cloneNode()
+  metricElement.textContent = `Average: ${averageString}`
+  tooltipElement.appendChild(metricElement)
 
   return tooltipElement
 }
