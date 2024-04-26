@@ -26,6 +26,7 @@ const readableMetrics = {
   highestDegree_bachelor_pct: "Probability that neighbours have earned a Bachelor's degree",
 }
 let censusData = []
+let selectedData = []
 let map
 async function main() {
   initiatlizeMap()
@@ -43,10 +44,10 @@ async function getCensusData() {
 }
 function sortCensusDataByMetrics(data, metrics) {
   const dataWithMetricsAverage = data.map(item => {
-    const averagedMetricsValue = metrics.reduce((product, metric) => product * item[metric],1)
+    const sumMetricsValues = metrics.reduce((sum, metric) => sum + item[metric],0.0)
     return {
       ...item,
-      averageMetrics: averagedMetricsValue
+      averageMetrics: sumMetricsValues / metrics.length
     }
   })
   var sortedData = dataWithMetricsAverage.sort(function(a,b) {
@@ -59,6 +60,15 @@ function sortCensusDataByMetrics(data, metrics) {
     return 0; // Return 0 if a and b are equal
   })
   return sortedData
+}
+function sortBoundaryData(data) {
+  const idIndexMap = {};
+  selectedData.forEach((item, index) => {
+      idIndexMap[parseInt(item.ALT_GEO_CODE)] = index;
+  });
+  return data.sort((a,b) => {
+    return idIndexMap[a.dauid] - idIndexMap[b.dauid]
+  })
 }
 function populateMetricsSelect(censusData, selectElementId) {
   const keys = Object.keys(censusData[0])
@@ -113,7 +123,7 @@ function populateLocationsSelect(data, selectElementId) {
   data.forEach(item => {
     const option = document.createElement('option')
     option.value = item.ALT_GEO_CODE
-    option.textContent = item.CENSUS_DIVISION_NAME ? `${item.GEO_NAME} (${item.CENSUS_DIVISION_NAME})` : item.GEO_NAME
+    option.textContent = item.CENSUS_DIVISION_NAME ? `${item.GEO_NAME} (${item.CENSUS_DIVISION_NAME}) [${item.averageMetrics}]` : item.GEO_NAME
     newSelectElement.appendChild(option)
   })
 
@@ -139,11 +149,11 @@ function handleParamsChange(data) {
   let filteredData = sortedData
   if (selectedCensusDivisions.length > 0) {
     filteredData = sortedData.filter(item => {
-      let itemMatchesSelectedCensusDivision = false
+      let selectedCensusDivisionsContainItem = false
       selectedCensusDivisions.forEach(selectedCensusDivision => {
-        if (item.CENSUS_DIVISION_NAME === selectedCensusDivision) itemMatchesSelectedCensusDivision = true
+        if (item.CENSUS_DIVISION_NAME === selectedCensusDivision) selectedCensusDivisionsContainItem = true
       })
-      return itemMatchesSelectedCensusDivision
+      return selectedCensusDivisionsContainItem
     })
   }
 
@@ -162,6 +172,8 @@ function handleParamsChange(data) {
     finalData = filteredData.slice(0,parseInt(filteredData.length * parseInt(numResults) / 100))
   }
 
+  //console.log(finalData.map(item => item.averageMetrics))
+  selectedData = finalData
   populateLocationsSelect(finalData, 'location')
 }
 function handleLocationChange() {
@@ -174,8 +186,7 @@ function handleButtonClick(e) {
   clearMap()
 
   // Locations are sorted and filtered as controls are adjusted
-  const locations = Array.from(document.querySelectorAll(`#location option`))
-  const ids = locations.map(option => option.value)
+  const ids = selectedData.map(item => item.ALT_GEO_CODE)
 
   highlightGeos(ids)
 }
@@ -204,17 +215,17 @@ function highlightGeos(idsArray) {
   })
     .then(response => response.json())
     .then(data => {
-      const total = data.length
+      const sortedData = sortBoundaryData(data)
+      const total = sortedData.length
       let count = 0
       let color = '#00f'
-      data.forEach(item => {
+      console.log(sortedData)
+      sortedData.forEach(item => {
         count++
-        if (count < total/2) color = '#40d'
-        if (count < total/4) color = '#80b'
-        if (count < total/8) color = '#808'
-        if (count < total/16) color = '#b08'
-        if (count < total/32) color = '#d04'
-        if (count < total/64) color = '#f00'
+        if (count < parseInt(total/2)) color = '#40d' // 50%
+        if (count < parseInt(total/4)) color = '#808' // 25%
+        if (count < parseInt(total/8)) color = '#d04' // 12.5%
+        if (count < parseInt(total/16)) color = '#f00' // 6.25%
         const polygon = L.polygon(item.coordinates, {
           color: color,
           fillColor: color,
@@ -223,9 +234,6 @@ function highlightGeos(idsArray) {
         })
         .bindTooltip(buildTooltip(item.dauid))
         .addTo(map)
-        polygon.on('mouseover', function(e) {
-          console.log(item.dauid)
-        })
         //map.fitBounds(polygon.getBounds())
       })
     })
