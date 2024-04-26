@@ -225,7 +225,7 @@ function highlightGeos(idsArray) {
         if (count < parseInt(total/2)) color = '#40d' // 50%
         if (count < parseInt(total/4)) color = '#808' // 25%
         if (count < parseInt(total/8)) color = '#d04' // 12.5%
-        if (count < parseInt(total/16)) color = '#f00' // 6.25%
+        if (count < parseInt(total/16)) color = '#d00' // 6.25%
         const polygon = L.polygon(item.coordinates, {
           color: color,
           fillColor: color,

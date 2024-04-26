@@ -10,10 +10,10 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="loader.css" />
     <style>
+      /* Mobile-first */
       #map {
-        height: 95vh;
-        width: 67vw;
-        display: table-cell;
+        height: 42vh;
+        width: 100vw;
       }
       #map-overlay {
         position: absolute;
@@ -27,11 +27,10 @@
         display: none;
       }
       #controls {
-        height: 95vh;
-        width: 33vw;
+        width: 100vw;
+        height: 58vh;
         padding: 0 1em 1em 1em;
         overflow-y: scroll;
-        display: table-cell;
       }
       #controls select {
         display: table-row;
@@ -50,6 +49,25 @@
         transform: none;
         width: auto;
         left: 0;
+      }
+      body > div {
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Desktop overrides */
+      @media screen and (min-width: 64em) {
+        body > div {
+          flex-direction: row;
+        }
+        #map {
+          height: 95vh;
+        }
+        #controls {
+          width: auto;
+          height: 95vh;
+          overflow-y: unset;
+        }
       }
   </style>
 </head>
