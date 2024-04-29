@@ -10,23 +10,24 @@ User to be able to filter out DAs that are on a First Nations Reservation
 (optional) User should be able to filter results by regional districts (census sub-division)
 */
 const readableMetrics = {
-  age_0to4_pct: "Probability that neighbours are aged 0-4",
-  age_5to9_pct: "Probability that neighbours are aged 5-9",
-  age_40to44_pct: "Probability that neighbours are aged 40-44",
-  householdType_withChildren_pct: "Probability that neighbourhood households have children",
-  housingType_singleDetached_pct: "Probability that a neighbourhood dwelling is Single Detached",
-  householdIncome_100kPlus_pct: "Probability that neighbourhood households earn >$100k (gross)",
-  householdIncome_100k_to_125k_pct: "Probability that neighbourhood households earn $100k-$125k (gross)",
-  householdIncome_125k_to_150k_pct: "Probability that neighbourhood households earn $125k-$150k (gross)",
-  householdIncome_150k_to_200k_pct: "Probability that neighbourhood households earn $150k-$200k (gross)",
-  familySize_couplesWithChildren_avg: "Average couples-with-children family size in the neighbourhood",
-  motherTongue_english_pct: "Probability that neighbours' mother-tongue is English",
-  ethnicOrigin_canadian_pct: "Probability that neighbours' ethnic origin is 'Canadian",
-  ethnicOrigin_dutch_pct: "Probability that neighbours' ethnic origin is 'Dutch",
-  ethnicOrigin_euro_pct: "Probability that neighbours' ethnic origin is 'European",
-  religion_buddhist_pct: "Probability that neighbours are Buddhist",
-  religion_christian_pct: "Probability that neighbours are Christian",
-  highestDegree_bachelor_pct: "Probability that neighbours have earned a Bachelor's degree",
+  highestDegree_bachelor_pct: "Neighbours have earned a Bachelor's degree",
+  householdType_withChildren_pct: "Neighbourhood households have children",
+  age_0to4_pct: "Neighbours are aged 0-4",
+  age_5to9_pct: "Neighbours are aged 5-9",
+  age_40to44_pct: "Neighbours are aged 40-44",
+  motherTongue_english_pct: "Neighbours' mother-tongue is English",
+  mostCommonSpokenLanguage_english_pct: "Neighbours' most spoken home language is English",
+  householdIncome_100kPlus_pct: "Neighbourhood households earn >$100k (gross)",
+  householdIncome_100k_to_125k_pct: "Neighbourhood households earn $100k-$125k (gross)",
+  householdIncome_125k_to_150k_pct: "Neighbourhood households earn $125k-$150k (gross)",
+  householdIncome_150k_to_200k_pct: "Neighbourhood households earn $150k-$200k (gross)",
+  housingType_singleDetached_pct: "Neighbourhood dwellings are Single Detached type",
+  ethnicOrigin_canadian_pct: "Neighbours' ethnic origin is 'Canadian",
+  ethnicOrigin_dutch_pct: "Neighbours' ethnic origin is 'Dutch",
+  ethnicOrigin_euro_pct: "Neighbours' ethnic origin is 'European",
+  religion_buddhist_pct: "Neighbours are Buddhist",
+  religion_christian_pct: "Neighbours are Christian",
+  familySize_couplesWithChildren_avg: "Average size of couples-with-children families in the neighbourhood",
 }
 let censusData = []
 let selectedData = []
@@ -75,7 +76,7 @@ function sortBoundaryData(data) {
 }
 function populateMetricsSelect(censusData, selectElementId) {
   const keys = Object.keys(censusData[0])
-  const selectedKeys = keys.filter(key => {
+  const keysToDisplay = keys.filter(key => {
     const split = key.split("_")
     if (split[0] === "ethnicOrigin") return false
     switch (split[split.length-1]) {
@@ -90,10 +91,10 @@ function populateMetricsSelect(censusData, selectElementId) {
   const oldSelectElement = document.getElementById(selectElementId)
   const newSelectElement = oldSelectElement.cloneNode(false)
 
-  selectedKeys.forEach(selectedKey => {
+  keysToDisplay.forEach(keyToDisplay => {
     const option = document.createElement('option')
-    option.value = selectedKey
-    option.textContent = readableMetrics[selectedKey]
+    option.value = keyToDisplay
+    option.textContent = readableMetrics[keyToDisplay]
     newSelectElement.appendChild(option)
   })
 

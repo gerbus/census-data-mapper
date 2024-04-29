@@ -2,7 +2,7 @@ const fs = require('fs');
 const csv = require('csv-parser');
 
 // Array of IDs to match against
-const idsToMatch = ["CHARACTERISTIC_ID","8","10","11","19","41","42","100","103","260","276","277","278","279","312","393","396","1698","1699","1709","1718","1949","1950","1951","2014","2024"]; // Add your desired IDs here
+const idsToMatch = ["CHARACTERISTIC_ID","8","10","11","19","41","42","100","103","260","276","277","278","279","312","393","396","735","738","1698","1699","1709","1718","1949","1950","1951","2014","2024"]; // Add your desired IDs here
 
 // Input CSV file path
 const inputFilePath = '../../98-401-X2021006_BC_CB_eng_CSV/98-401-X2021006_English_CSV_data_BritishColumbia.csv'; // Provide the path to your CSV file
