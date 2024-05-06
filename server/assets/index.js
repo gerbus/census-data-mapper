@@ -43,7 +43,7 @@ main()
 
 // Data functions
 async function getCensusData() {
-  const censusData = await fetch("https://neighbourhood.gerbus.ca/census-data").then(response => response.json())
+  const censusData = await fetch(`${window.location.protocol}//${window.location.host}/census-data`).then(response => response.json())
   return censusData
 }
 function sortCensusDataByMetrics(data, metrics) {
@@ -208,7 +208,7 @@ function highlightGeos(idsArray) {
   document.getElementById('map-overlay').style.display = "table-cell"
 
   // Fetch boundary data for ids
-  fetch("https://neighbourhood.gerbus.ca/boundary-data", {
+  fetch(`${window.location.protocol}//${window.location.host}/boundary-data`, {
     method: "POST",
     body: JSON.stringify({
       ids: idsArray
@@ -226,10 +226,10 @@ function highlightGeos(idsArray) {
       console.log(sortedData)
       sortedData.forEach(item => {
         count++
-        if (count < parseInt(total/2)) color = '#40d' // 50%
-        if (count < parseInt(total/4)) color = '#808' // 25%
-        if (count < parseInt(total/8)) color = '#d04' // 12.5%
-        if (count < parseInt(total/16)) color = '#d00' // 6.25%
+        if (count < parseInt(total/2)) color = '#32a852' // 50%
+        if (count < parseInt(total/4)) color = '#32a8a8' // 25%
+        if (count < parseInt(total/8)) color = '#9832a8' // 12.5%
+        if (count < parseInt(total/16)) color = '#a83232' // 6.25%
         const polygon = L.polygon(item.coordinates, {
           color: color,
           fillColor: color,
