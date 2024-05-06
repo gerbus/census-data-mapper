@@ -29,6 +29,12 @@ const readableMetrics = {
   religion_christian_pct: "Neighbours are Christian",
   familySize_couplesWithChildren_avg: "Average size of couples-with-children families in the neighbourhood",
 }
+const mapColors = {
+  bulk: '#1c7ec9',
+  good: '#1cbbc9',
+  better: '#5ec91c',
+  best: '#c9c91c'
+}
 let censusData = []
 let selectedData = []
 let map
@@ -226,10 +232,11 @@ function highlightGeos(idsArray) {
       console.log(sortedData)
       sortedData.forEach(item => {
         count++
-        if (count < parseInt(total/2)) color = '#32a852' // 50%
-        if (count < parseInt(total/4)) color = '#32a8a8' // 25%
-        if (count < parseInt(total/8)) color = '#9832a8' // 12.5%
-        if (count < parseInt(total/16)) color = '#a83232' // 6.25%
+        if (count >= parseInt(total/2)) color = mapColors.bulk // 50%
+        if (count < parseInt(total/2)) color = mapColors.good // 25%
+        if (count < parseInt(total/4)) color = mapColors.better // 12.5%
+        if (count < parseInt(total/8)) color = mapColors.best // 6.25%
+        //if (count < parseInt(total/16)) color = mapColors.best // 6.25%
         const polygon = L.polygon(item.coordinates, {
           color: color,
           fillColor: color,
