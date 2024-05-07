@@ -229,6 +229,7 @@ function handleLocationChange() {
 }
 function handleButtonClick(e) {
   e.preventDefault()
+  handleParamsChange(censusData)
   clearMap()
 
   // Locations are sorted and filtered as controls are adjusted
@@ -289,7 +290,7 @@ function highlightGeos(idsArray) {
     })
 }
 function buildTooltip(dauid) {
-  const da = censusData.find(censusItem => censusItem.ALT_GEO_CODE === dauid)
+  const da = selectedData.find(item => item.ALT_GEO_CODE === dauid)
 
   // Build a tooltip that shows the relevant metrics plus a bit of meta
   const tooltipElement = document.getElementById('tooltip').cloneNode(true)
@@ -299,12 +300,10 @@ function buildTooltip(dauid) {
   // Display selected metrics
   const selectedMetricsOptions = document.querySelectorAll(`#metrics option:checked`)
   const metrics = Array.from(selectedMetricsOptions).map(option => option.value)
-  let sum = 0.0
   metrics.forEach(metric => {
     const metricElement = tooltipElement.querySelectorAll('.metric')[0].cloneNode()
     const metricSplit = metric.split('_')
     let metricVal = da[metric]
-    sum += metricVal
     if (metricSplit[metricSplit.length-1] === "pct") {
       metricVal = Math.round(1000 * da[metric])/10 + "%"
     }
@@ -313,9 +312,10 @@ function buildTooltip(dauid) {
     tooltipElement.appendChild(metricElement)
   })
 
-  const averageString = Math.round(1000 * sum / metrics.length)/10 + "%"
+  const averageString = Math.round(1000 * da.averageMetrics)/10 + "%"
+  const normalizedAverageString = Math.round(1000 * da.normalizedAverageMetrics)/10 + "%"
   const metricElement = tooltipElement.querySelectorAll('.metric')[0].cloneNode()
-  metricElement.textContent = `Average: ${averageString}`
+  metricElement.textContent = `Normalized Average: ${normalizedAverageString}`
   tooltipElement.appendChild(metricElement)
 
   return tooltipElement
