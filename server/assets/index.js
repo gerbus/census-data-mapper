@@ -54,23 +54,58 @@ async function getCensusData() {
   return censusData
 }
 function sortCensusDataBySelectedMetrics(data, selectedMetrics) {
-  const dataWithMetricsAverage = data.map(item => {
+  const minmax = calculateMinMax(data, selectedMetrics)
+  const dataWithAverages = data.map(item => {
     const sumMetricsValues = selectedMetrics.reduce((sum, metric) => sum + item[metric],0.0)
+    const sumNormalizedMetricsValues = selectedMetrics.reduce((sum, metric) => {
+      return sum + (item[metric] - minmax[metric].min) / minmax[metric].max
+    },0.0)
     return {
       ...item,
-      averageMetrics: sumMetricsValues / selectedMetrics.length
+      averageMetrics: sumMetricsValues / selectedMetrics.length,
+      normalizedAverageMetrics: sumNormalizedMetricsValues / selectedMetrics.length
     }
   })
-  var sortedData = dataWithMetricsAverage.sort(function(a,b) {
-    if (a.averageMetrics > b.averageMetrics) {
+  var sortedData = dataWithAverages.sort(function(a,b) {
+    if (a.normalizedAverageMetrics > b.normalizedAverageMetrics) {
       return -1; // Return -1 if a should come before b
     }
-    if (a.averageMetrics < b.averageMetrics) {
+    if (a.normalizedAverageMetrics < b.normalizedAverageMetrics) {
       return 1; // Return 1 if a should come after b
     }
     return 0; // Return 0 if a and b are equal
   })
   return sortedData
+}
+function calculateMinMax(data, metrics) {
+  // Initialize an object to store min and max values for each metric
+  const minMaxValues = {};
+
+  // Loop through each metric
+  metrics.forEach(metric => {
+    // Initialize min and max values for the current metric
+    let minValue = Infinity;
+    let maxValue = -Infinity;
+
+    // Loop through each data item
+    data.forEach(item => {
+      // Check if the current data item has a value for the current metric
+      if (item.hasOwnProperty(metric)) {
+        // Update min and max values if necessary
+        if (item[metric] < minValue) {
+          minValue = item[metric];
+        }
+        if (item[metric] > maxValue) {
+          maxValue = item[metric];
+        }
+      }
+    });
+
+    // Store min and max values for the current metric
+    minMaxValues[metric] = { min: minValue, max: maxValue };
+  });
+
+  return minMaxValues;
 }
 function sortBoundaryData(data) {
   const idIndexMap = {};
