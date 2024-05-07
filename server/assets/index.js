@@ -47,17 +47,18 @@ async function main() {
 }
 main()
 
+
 // Data functions
 async function getCensusData() {
   const censusData = await fetch(`${window.location.protocol}//${window.location.host}/census-data`).then(response => response.json())
   return censusData
 }
-function sortCensusDataByMetrics(data, metrics) {
+function sortCensusDataBySelectedMetrics(data, selectedMetrics) {
   const dataWithMetricsAverage = data.map(item => {
-    const sumMetricsValues = metrics.reduce((sum, metric) => sum + item[metric],0.0)
+    const sumMetricsValues = selectedMetrics.reduce((sum, metric) => sum + item[metric],0.0)
     return {
       ...item,
-      averageMetrics: sumMetricsValues / metrics.length
+      averageMetrics: sumMetricsValues / selectedMetrics.length
     }
   })
   var sortedData = dataWithMetricsAverage.sort(function(a,b) {
@@ -145,13 +146,13 @@ function populateLocationsSelect(data, selectElementId) {
 
 // Handler functions
 function handleParamsChange(data) {
-  // Only care about Dissemination Areas
+  // Only care about neighbourhoods (Dissemination Areas)
   const dataDAs = data.filter(item => item.GEO_LEVEL === "Dissemination area")
 
-  // Use metrics to sort location list
+  // Use metrics to sort neighbourhoods
   const selectedMetricsOptions = document.querySelectorAll(`#metrics option:checked`)
-  const metrics = Array.from(selectedMetricsOptions).map(option => option.value)
-  const sortedData = sortCensusDataByMetrics(dataDAs, metrics)
+  const selectedMetrics = Array.from(selectedMetricsOptions).map(option => option.value)
+  const sortedData = sortCensusDataBySelectedMetrics(dataDAs, selectedMetrics)
 
   // Use census divisions to filter location list
   const selectedCensusDivisionOptions = document.querySelectorAll('#census-divisions option:checked')
