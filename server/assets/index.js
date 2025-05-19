@@ -35,6 +35,11 @@ const mapColors = {
   better: '#5ec91c',
   best: '#c9c91c'
 }
+const config = {
+  serverUrl: window.location.hostname === 'localhost'
+    ? 'https://neighbourhood.gerbus.ca/'
+    : `${window.location.protocol}//${window.location.host}`
+}
 let censusData = []
 let selectedData = []
 let map
@@ -50,7 +55,7 @@ main()
 
 // Data functions
 async function getCensusData() {
-  const censusData = await fetch(`${window.location.protocol}//${window.location.host}/census-data`).then(response => response.json())
+  const censusData = await fetch(`${config.serverUrl}/census-data`).then(response => response.json())
   return censusData
 }
 function sortCensusDataBySelectedMetrics(data, selectedMetrics) {
@@ -251,7 +256,7 @@ function highlightGeos(idsArray) {
   document.getElementById('map-overlay').style.display = "table-cell"
 
   // Fetch boundary data for ids
-  fetch(`${window.location.protocol}//${window.location.host}/boundary-data`, {
+  fetch(`${config.serverUrl}/boundary-data`, {
     method: "POST",
     body: JSON.stringify({
       ids: idsArray

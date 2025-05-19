@@ -4,6 +4,7 @@ const path = require('path')
 const compression = require("compression")
 const helmet = require("helmet")
 const RateLimit = require("express-rate-limit");
+const cors = require('cors');
 const limiter = RateLimit({     // Set up rate limiter: maximum of twenty requests per minute
   windowMs: 1 * 60 * 1000, // 1 minute
   max: 20,
@@ -13,7 +14,15 @@ const app = express();
 const PORT = parseInt(process.env.PORT,10) || 3000;
 const dbURI = 'mongodb://localhost:27017/neighbourhoodfinder';
 
-app.set("trust proxy", true)
+// Add CORS configuration
+const corsOptions = {
+  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
+};
+
+// Apply CORS middleware
+app.use(cors(corsOptions));
 
 // Sample JSON file path (replace with the path to your JSON file)
 const censusDerivedDataFilePath = 'assets/canada-census-2021-bc-derived.json';
@@ -23,7 +32,8 @@ app.use(
         directives: {
             "script-src": ["'self'", "unpkg.com"],
             "script-src-attr": ["'self'", "'unsafe-inline'"],
-            "img-src": ["'self'", "*.openstreetmap.org", "data:"]
+            "img-src": ["'self'", "*.openstreetmap.org", "data:"],
+            "connect-src": ["'self'", "https://neighbourhood.gerbus.ca"]
         },
     }),
 )
