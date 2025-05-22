@@ -30,10 +30,10 @@ const readableMetrics = {
   familySize_couplesWithChildren_avg: "Average size of couples-with-children families in the neighbourhood",
 }
 const mapColors = {
-  bulk: '#1c7ec9',
-  good: '#1cbbc9',
-  better: '#5ec91c',
-  best: '#c9c91c'
+  bulk: '#1c7ec9',    // Blue (starting color)
+  good: '#661cc9',    // Purple-blue
+  better: '#c91c9e',  // Purple-red
+  best: '#c91c1c'     // Red (ending color)
 }
 const config = {
   serverUrl: window.location.hostname === 'localhost'
@@ -241,6 +241,40 @@ function handleButtonClick(e) {
   const ids = selectedData.map(item => item.ALT_GEO_CODE)
 
   highlightGeos(ids)
+  updateLegend()
+}
+
+function updateLegend() {
+  const legend = document.getElementById('legend')
+  const legendItems = document.getElementById('legend-items')
+  legendItems.innerHTML = '' // Clear existing items
+
+  // Get the selected percentile
+  const selectedPercentile = parseInt(document.getElementById("result-size").value)
+  if (!selectedPercentile) return // Don't show legend if no percentile selected
+
+  // Calculate the tiers (each tier is half of the previous)
+  const tiers = [
+    { color: mapColors.best, percent: selectedPercentile / 8 },
+    { color: mapColors.better, percent: selectedPercentile / 4 },
+    { color: mapColors.good, percent: selectedPercentile / 2 },
+    { color: mapColors.bulk, percent: selectedPercentile }
+  ]
+
+  // Create legend items
+  tiers.forEach(tier => {
+    const item = document.createElement('div')
+    item.style.marginBottom = '5px'
+    item.innerHTML = `
+      <span style="display: inline-block; width: 20px; height: 20px; background-color: ${tier.color};
+             margin-right: 10px; vertical-align: middle; opacity: 0.7;"></span>
+      <span>Top ${Number(tier.percent.toFixed(3)).toString()}%</span>
+    `
+    legendItems.appendChild(item)
+  })
+
+  // Show the legend
+  legend.style.display = 'block'
 }
 
 // Display functions
@@ -270,7 +304,7 @@ function highlightGeos(idsArray) {
       const sortedData = sortBoundaryData(data)
       const total = sortedData.length
       let count = 0
-      let color = '#00f'
+      let color
       console.log(sortedData)
       sortedData.forEach(item => {
         count++
@@ -278,7 +312,6 @@ function highlightGeos(idsArray) {
         if (count < parseInt(total/2)) color = mapColors.good // 25%
         if (count < parseInt(total/4)) color = mapColors.better // 12.5%
         if (count < parseInt(total/8)) color = mapColors.best // 6.25%
-        //if (count < parseInt(total/16)) color = mapColors.best // 6.25%
         const polygon = L.polygon(item.coordinates, {
           color: color,
           fillColor: color,
@@ -331,4 +364,7 @@ function clearMap() {
       layer.remove()
     }
   });
+
+  // Hide the legend when clearing the map
+  document.getElementById('legend').style.display = 'none'
 }
