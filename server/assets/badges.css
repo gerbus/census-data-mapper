@@ -1,0 +1,33 @@
+.badge-container {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 5px 0;
+}
+
+.badge-group {
+  display: inline-flex;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #535353;
+  background-color: #333;
+  color: #fff;
+  font-size: 14px;
+  margin: 4px;
+}
+
+.badge-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 12px;
+  background-color: #333;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.badge-item:not(:last-child) {
+  border-right: 1px solid #535353;
+}
+
+.badge-item:hover {
+  background-color: #555;
+}

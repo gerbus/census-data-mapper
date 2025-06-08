@@ -29,6 +29,26 @@ const readableMetrics = {
   religion_christian_pct: "Neighbours are Christian",
   familySize_couplesWithChildren_avg: "Average size of couples-with-children families in the neighbourhood",
 }
+const readableMetricsShort = {
+  highestDegree_bachelor_pct: "Degree",
+  householdType_withChildren_pct: "With Children",
+  age_0to4_pct: "Ages 0-4",
+  age_5to9_pct: "Ages 5-9",
+  age_40to44_pct: "Ages 40-44",
+  motherTongue_english_pct: "English native",
+  mostCommonSpokenLanguage_english_pct: "English primary",
+  householdIncome_100kPlus_pct: ">$100k",
+  householdIncome_100k_to_125k_pct: "$100k-$125k",
+  householdIncome_125k_to_150k_pct: "$125k-$150k",
+  householdIncome_150k_to_200k_pct: "$150k-$200k",
+  housingType_singleDetached_pct: "Detached home",
+  ethnicOrigin_canadian_pct: "Canadian",
+  ethnicOrigin_dutch_pct: "Dutch",
+  ethnicOrigin_euro_pct: "European",
+  religion_buddhist_pct: "Buddhist",
+  religion_christian_pct: "Christian",
+  familySize_couplesWithChildren_avg: "Couples w/ Children",
+}
 const mapColors = {
   bulk: '#1c7ec9',    // Blue (starting color)
   good: '#661cc9',    // Purple-blue
@@ -49,6 +69,9 @@ async function main() {
   populateMetricsSelect(censusData, 'metrics')
   populateCensusDivisionsSelect(censusData, 'census-divisions')
   document.getElementById('submit').addEventListener('click', handleButtonClick)
+
+  document.getElementById('metrics').addEventListener('change', () => updateBadges('metrics', 'metrics-badge-container'));
+  document.getElementById('census-divisions').addEventListener('change', () => updateBadges('census-divisions', 'census-divisions-badge-container'));
 }
 main()
 
@@ -367,4 +390,38 @@ function clearMap() {
 
   // Hide the legend when clearing the map
   document.getElementById('legend').style.display = 'none'
+}
+
+function updateBadges(selectId, containerId) {
+    const selectElement = document.getElementById(selectId);
+    const badgeContainer = document.getElementById(containerId);
+    badgeContainer.innerHTML = '';
+
+    const selectedOptions = Array.from(selectElement.selectedOptions);
+
+    if (selectedOptions.length > 0) {
+        const badgeGroup = document.createElement('div');
+        badgeGroup.className = 'badge-group';
+
+        selectedOptions.forEach(option => {
+            const badgeItem = document.createElement('div');
+            badgeItem.className = 'badge-item';
+
+            const textContent = readableMetricsShort[option.value] || option.textContent;
+            badgeItem.textContent = textContent;
+
+            badgeItem.onclick = (e) => {
+                e.stopPropagation();
+                option.selected = false;
+
+                // Manually trigger the change event to re-render badges and update dependent data
+                const changeEvent = new Event('change', { 'bubbles': true });
+                selectElement.dispatchEvent(changeEvent);
+            };
+
+            badgeGroup.appendChild(badgeItem);
+        });
+
+        badgeContainer.appendChild(badgeGroup);
+    }
 }
