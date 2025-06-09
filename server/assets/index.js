@@ -470,5 +470,5 @@ function setToggleIcon() {
 
     const isCollapsed = controls.classList.contains('collapsed');
     toggleButtonUp.innerHTML = !isCollapsed ? '▲' : '▼';
-    toggleButtonLeft.innerHTML = !isCollapsed ? '⏴' : '⏵';
+    toggleButtonLeft.innerHTML = !isCollapsed ? '◀' : '▶';
 }
