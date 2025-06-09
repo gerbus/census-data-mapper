@@ -338,10 +338,15 @@ function highlightGeos(idsArray) {
   })
     .then(response => response.json())
     .then(data => {
+      if (data.length === 0) {
+        document.getElementById('map-overlay').style.display = "none";
+        return;
+      }
       const sortedData = sortBoundaryData(data)
       const total = sortedData.length
       let count = 0
       let color
+      const polygons = []
       console.log(sortedData)
       sortedData.forEach(item => {
         count++
@@ -356,9 +361,12 @@ function highlightGeos(idsArray) {
           _geo_code: item.dauid
         })
         .bindTooltip(buildTooltip(item.dauid))
-        .addTo(map)
-        //map.fitBounds(polygon.getBounds())
+
+        polygons.push(polygon)
       })
+
+      const featureGroup = L.featureGroup(polygons).addTo(map);
+      map.fitBounds(featureGroup.getBounds());
     })
     .then(() => {
       document.getElementById('map-overlay').style.display = "none"
