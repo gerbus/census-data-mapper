@@ -11,15 +11,28 @@
     <link rel="stylesheet" href="loader.css" />
     <link rel="stylesheet" href="badges.css" />
     <style>
-      /* Mobile-first */
+      html, body {
+        height: 100%;
+        margin: 0;
+        overflow: hidden; /* Prevent scrolling of the body */
+      }
+      #app-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
       #map {
-        height: 42vh;
-        width: 100vw;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
       }
       #map-overlay {
         position: absolute;
-        top: 0px;
-        left: 0px;
+        top: 0;
+        left: 0;
         height: 100%;
         width: 100%;
         background-color: white;
@@ -28,115 +41,173 @@
         display: none;
       }
       #controls {
-        width: 100vw;
-        height: 58vh;
+        position: absolute;
+        z-index: 2;
+        background: white;
+        box-shadow: 0 0 15px rgba(0,0,0,0.3);
+        transition: all 0.3s ease-in-out;
+      }
+      #controls-content {
         padding: 0 1em 1em 1em;
-        overflow-y: scroll;
+        height: 100%;
+        overflow: auto;
       }
-      #controls select {
-        display: table-row;
-      }
-      #controls #metrics, #controls #census-divisions {
-        display: none;
-      }
-      #controls label {
-        margin-top: 1em;
-      }
-      #controls #location {
-        height: auto;
-      }
-      #controls .loader {
-        position: relative;
-        transform: none;
-        width: auto;
-        left: 0;
-      }
-      body > div {
+      .toggle-controls {
+        z-index: 3;
+        background: white;
+        border: 1px solid #ccc;
+        cursor: pointer;
         display: flex;
-        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2em;
+        transition: all 0.3s ease-in-out;
       }
 
-      /* Desktop overrides */
-      @media screen and (min-width: 64em) {
-        body > div {
-          flex-direction: row;
-        }
-        #map {
-          height: 95vh;
-        }
+      /* Mobile Portrait (Default) */
+      #controls {
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 58vh;
+        overflow: auto;
+      }
+      #controls.collapsed {
+        height: 64px;
+      }
+      #toggle-controls-up {
+        position: absolute;
+        top: 58vh;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 30px;
+        border-radius: 0 0 15px 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        border-top: none;
+      }
+      #toggle-controls-left {
+        display: none;
+      }
+      #toggle-controls-up.collapsed {
+        top: 64px;
+      }
+      #controls-content h2 {
+        margin-top: 0.5em;
+        margin-bottom: 0;
+      }
+
+      #metrics, #census-divisions, #location {
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      /* Mobile Landscape & Desktop */
+      @media (min-width: 640px), (orientation: landscape) {
         #controls {
+          top: 0;
+          left: 0;
+          max-width: 90vw;
           width: auto;
-          height: 95vh;
-          overflow-y: unset;
+          height: 100%;
+          border-radius: 0;
+          overflow: visible;
+        }
+        #controls.collapsed {
+          height: 100%;
+          width: 0px;
+        }
+        #controls.collapsed #controls-content {
+          display: none;
+        }
+        #toggle-controls-left {
+          position: absolute;
+          display: block;
+          top: 0;
+          right: -30px;
+          left: unset;
+          width: 30px;
+          height: 60px;
+          border-radius: 0 15px 15px 0;
+          box-shadow: 4px 0 4px rgba(0,0,0,0.2);
+          border-left: none;
+          border-top: none;
+        }
+        #toggle-controls-up {
+          display: none;
         }
       }
   </style>
 </head>
 <body>
-  <div>
+  <div id="app-container">
     <form id="controls" class="pure-form pure-form-stacked">
-      <h2 style="margin-bottom: 0">BC Neighbourhood Finder</h2>
-      <small>By 2021 Census Data</small>
-      <fieldset>
-        <label for="metrics">Select metric(s) to optimize for</label>
-        <div class="loader" id="metrics-loader">
-          <div class="bar1"></div>
-          <div class="bar2"></div>
-          <div class="bar3"></div>
-          <div class="bar4"></div>
-          <div class="bar5"></div>
-          <div class="bar6"></div>
-        </div>
-        <div id="metrics-badge-container" class="badge-container"></div>
-        <select id="metrics" multiple size="7"></select>
-        <span class="pure-form-message">Select multiples by command-clicking or control-clicking</span>
-
-        <div class="pure-g">
-          <div class="pure-u-1 pure-u-md-1-2">
-            <label for="result-size">Percentile</label>
-            <select id="result-size">
-              <option value="1">Top 1%</option>
-              <option selected value="5">Top 5%</option>
-              <option value="10">Top 10%</option>
-              <option value="25">Top 25%</option>
-              <option value="50">Top 50%</option>
-              <option value="">All</option>
-            </select>
+      <div id="controls-content">
+        <h2>BC Neighbourhood Finder</h2>
+        <small>By 2021 Census Data</small>
+        <fieldset>
+          <label for="metrics">Select metric(s) to optimize for</label>
+          <div class="loader" id="metrics-loader">
+            <div class="bar1"></div>
+            <div class="bar2"></div>
+            <div class="bar3"></div>
+            <div class="bar4"></div>
+            <div class="bar5"></div>
+            <div class="bar6"></div>
           </div>
-          <!--div class="pure-u-1 pure-u-md-1-2">
-            <label for="lower-bound">Metric Lower-bound</label>
-            <select id="lower-bound">
-              <option value="95">95%+</option>
-              <option value="90">90%+</option>
-              <option value="80">80%+</option>
-              <option value="70">70%+</option>
-              <option value="60">60%+</option>
-              <option selected value="">Any</option>
-            </select>
-          </div-->
-        </div>
+          <div id="metrics-badge-container" class="badge-container"></div>
+          <select id="metrics" multiple size="7"></select>
+          <span class="pure-form-message">Select multiples by command-clicking or control-clicking</span>
 
-        <label for="census-divisions">Only show neighbourhoods in these division(s) – optional</label>
-        <div class="loader" id="census-divisions-loader">
-          <div class="bar1"></div>
-          <div class="bar2"></div>
-          <div class="bar3"></div>
-          <div class="bar4"></div>
-          <div class="bar5"></div>
-          <div class="bar6"></div>
-        </div>
-        <div id="census-divisions-badge-container" class="badge-container"></div>
-        <select id="census-divisions" multiple size="7"></select>
-        <span class="pure-form-message">Select multiples by command-clicking or control-clicking</span>
+          <div class="pure-g">
+            <div class="pure-u-1 pure-u-md-1-2">
+              <label for="result-size">Percentile</label>
+              <select id="result-size">
+                <option value="1">Top 1%</option>
+                <option selected value="5">Top 5%</option>
+                <option value="10">Top 10%</option>
+                <option value="25">Top 25%</option>
+                <option value="50">Top 50%</option>
+                <option value="">All</option>
+              </select>
+            </div>
+            <!--div class="pure-u-1 pure-u-md-1-2">
+              <label for="lower-bound">Metric Lower-bound</label>
+              <select id="lower-bound">
+                <option value="95">95%+</option>
+                <option value="90">90%+</option>
+                <option value="80">80%+</option>
+                <option value="70">70%+</option>
+                <option value="60">60%+</option>
+                <option selected value="">Any</option>
+              </select>
+            </div-->
+          </div>
 
-        <hr />
+          <label for="census-divisions">Only show neighbourhoods in these division(s) – optional</label>
+          <div class="loader" id="census-divisions-loader">
+            <div class="bar1"></div>
+            <div class="bar2"></div>
+            <div class="bar3"></div>
+            <div class="bar4"></div>
+            <div class="bar5"></div>
+            <div class="bar6"></div>
+          </div>
+          <div id="census-divisions-badge-container" class="badge-container"></div>
+          <select id="census-divisions" multiple size="7"></select>
+          <span class="pure-form-message">Select multiples by command-clicking or control-clicking</span>
 
-        <label for="location">Results (<span id="location-count"></span>)</label>
-        <select id="location" class="hidden" onchange="handleLocationChange()" size="7"></select>
+          <hr />
 
-        <button class="pure-button" id="submit">Show on Map</button>
-      </fieldset>
+          <label for="location">Results (<span id="location-count"></span>)</label>
+          <select id="location" class="hidden" onchange="handleLocationChange()" size="7"></select>
+
+          <button class="pure-button" id="submit">Show on Map</button>
+        </fieldset>
+      </div>
+      <button type="button" id="toggle-controls-left" class="toggle-controls"></button>
     </form>
+    <button type="button" id="toggle-controls-up" class="toggle-controls"></button>
     <div id="map">
       <div id="map-overlay">
         <div class="loader">

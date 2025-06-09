@@ -69,6 +69,14 @@ async function main() {
   populateMetricsSelect(censusData, 'metrics')
   populateCensusDivisionsSelect(censusData, 'census-divisions')
   document.getElementById('submit').addEventListener('click', handleButtonClick)
+  const toggleButtons = document.querySelectorAll('.toggle-controls')
+  if (toggleButtons) {
+    toggleButtons.forEach(button => {
+      button.addEventListener('click', handleToggle)
+    })
+    window.addEventListener('resize', setToggleIcon); // Update icon on resize/orientation change
+    setToggleIcon(); // Set initial icon
+  }
 
   document.getElementById('metrics').addEventListener('change', () => updateBadges('metrics', 'metrics-badge-container'));
   document.getElementById('census-divisions').addEventListener('change', () => updateBadges('census-divisions', 'census-divisions-badge-container'));
@@ -265,6 +273,11 @@ function handleButtonClick(e) {
 
   highlightGeos(ids)
   updateLegend()
+
+  const controls = document.getElementById('controls');
+  if (controls && !controls.classList.contains('collapsed')) {
+      handleToggle();
+  }
 }
 
 function updateLegend() {
@@ -424,4 +437,29 @@ function updateBadges(selectId, containerId) {
 
         badgeContainer.appendChild(badgeGroup);
     }
+}
+
+function handleToggle() {
+    const controls = document.getElementById('controls');
+    const toggleButtons = document.querySelectorAll('.toggle-controls');
+    if (!controls || !toggleButtons) return;
+
+    const controlsContent = document.getElementById('controls-content');
+    controls.classList.toggle('collapsed');
+    toggleButtons.forEach(button => {
+      button.classList.toggle('collapsed')
+    })
+    setToggleIcon();
+    controlsContent.scrollTop = 0
+}
+
+function setToggleIcon() {
+    const controls = document.getElementById('controls');
+    const toggleButtonUp = document.getElementById('toggle-controls-up');
+    const toggleButtonLeft = document.getElementById('toggle-controls-left');
+    if (!controls || !toggleButtonUp || !toggleButtonLeft) return;
+
+    const isCollapsed = controls.classList.contains('collapsed');
+    toggleButtonUp.innerHTML = !isCollapsed ? '▲' : '▼';
+    toggleButtonLeft.innerHTML = !isCollapsed ? '⏴' : '⏵';
 }
