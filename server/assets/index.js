@@ -316,7 +316,8 @@ function updateLegend() {
 // Display functions
 function initiatlizeMap() {
   // Initialize and display the map
-  map = L.map('map').setView([53.9, -122.7], 5); // Center and zoom the map to BC
+  map = L.map('map', { zoomControl: false }).setView([53.9, -122.7], 5); // Center and zoom the map to BC
+  L.control.zoom({ position: 'topright' }).addTo(map);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(map);
