@@ -328,6 +328,7 @@ function handleButtonClick(e) {
   if (controls && !controls.classList.contains('collapsed')) {
       handleToggle();
   }
+  document.getElementById('map-overlay-ui').style.display = 'flex';
 }
 
 function updateLegend() {
@@ -460,8 +461,8 @@ function clearMap() {
     }
   });
 
-  // Hide the legend when clearing the map
-  document.getElementById('legend').style.display = 'none'
+  // Hide the map overlay UI when clearing the map
+  document.getElementById('map-overlay-ui').style.display = 'none';
 }
 
 function updateBadges(selectId, containerId) {
