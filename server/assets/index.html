@@ -16,6 +16,9 @@
         margin: 0;
         overflow: hidden; /* Prevent scrolling of the body */
       }
+      label {
+        margin-top: 1em !important;
+      }
       #app-container {
         position: relative;
         width: 100%;
@@ -172,6 +175,13 @@
           flex-direction: row;
         }
       }
+      label[for="location"], #location {
+        display: none;
+      }
+      .search-button-container {
+        margin-top: 1em;
+        text-align: right;
+      }
     </style>
 </head>
 <body>
@@ -228,12 +238,12 @@
           </div>
           <select id="census-divisions" multiple size="7"></select>
 
-          <hr />
-
           <label for="location">Results (<span id="location-count"></span>)</label>
           <select id="location" class="hidden" onchange="handleLocationChange()" size="7"></select>
 
-          <button class="pure-button" id="submit">Search</button>
+          <div class="search-button-container">
+            <button class="pure-button pure-button-primary" id="submit">Search</button>
+          </div>
         </fieldset>
       </div>
       <button type="button" id="toggle-controls-left" class="toggle-controls"></button>
