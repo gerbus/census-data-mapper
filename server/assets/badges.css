@@ -1,7 +1,7 @@
 .badge-container {
   display: flex;
   flex-wrap: wrap;
-  padding: 5px 0;
+  padding: 0;
 }
 
 .badge-group {
@@ -12,7 +12,7 @@
   background-color: #333;
   color: #fff;
   font-size: 14px;
-  margin: 4px;
+  margin: 0;
 }
 
 .badge-item {
