@@ -78,7 +78,7 @@ async function main() {
     saveSelections('census-divisions');
   });
 
-  loadSelections('metrics');
+  const metricsLoaded = loadSelections('metrics');
   loadSelections('census-divisions');
 
   document.getElementById('submit').addEventListener('click', handleButtonClick)
@@ -93,6 +93,10 @@ async function main() {
 
   setupMultiSelect('metrics');
   setupMultiSelect('census-divisions');
+
+  if (metricsLoaded) {
+    handleButtonClick({ preventDefault: () => {} });
+  }
 }
 main()
 
@@ -527,11 +531,11 @@ function saveSelections(selectId) {
 
 function loadSelections(selectId) {
   const selectElement = document.getElementById(selectId);
-  if (!selectElement) return;
+  if (!selectElement) return false;
 
   const savedValues = JSON.parse(localStorage.getItem(`selected_${selectId}`));
 
-  if (savedValues) {
+  if (savedValues && savedValues.length > 0) {
     Array.from(selectElement.options).forEach(option => {
       if (savedValues.includes(option.value)) {
         option.selected = true;
@@ -541,5 +545,7 @@ function loadSelections(selectId) {
     // Manually trigger change event to update badges
     const changeEvent = new Event('change', { 'bubbles': true });
     selectElement.dispatchEvent(changeEvent);
+    return true;
   }
+  return false;
 }
