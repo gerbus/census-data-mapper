@@ -21,13 +21,8 @@
   padding: 4px 12px;
   background-color: #333;
   white-space: nowrap;
-  cursor: pointer;
 }
 
 .badge-item:not(:last-child) {
   border-right: 1px solid #535353;
-}
-
-.badge-item:hover {
-  background-color: #555;
 }

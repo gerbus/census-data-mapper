@@ -480,17 +480,8 @@ function updateBadges(selectId, containerId) {
             const badgeItem = document.createElement('div');
             badgeItem.className = 'badge-item';
 
-            const textContent = readableMetricsShort[option.value] || option.textContent;
+            const textContent = readableMetricsShort[option.value] || cleanCensusDivisionName(option.textContent);
             badgeItem.textContent = textContent;
-
-            badgeItem.onclick = (e) => {
-                e.stopPropagation();
-                option.selected = false;
-
-                // Manually trigger the change event to re-render badges and update dependent data
-                const changeEvent = new Event('change', { 'bubbles': true });
-                selectElement.dispatchEvent(changeEvent);
-            };
 
             badgeGroup.appendChild(badgeItem);
         });
