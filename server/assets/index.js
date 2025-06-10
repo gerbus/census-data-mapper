@@ -68,6 +68,19 @@ async function main() {
   censusData = await getCensusData()
   populateMetricsSelect(censusData, 'metrics')
   populateCensusDivisionsSelect(censusData, 'census-divisions')
+
+  document.getElementById('metrics').addEventListener('change', () => {
+    updateBadges('metrics', 'metrics-badge-container');
+    saveSelections('metrics');
+  });
+  document.getElementById('census-divisions').addEventListener('change', () => {
+    updateBadges('census-divisions', 'census-divisions-badge-container');
+    saveSelections('census-divisions');
+  });
+
+  loadSelections('metrics');
+  loadSelections('census-divisions');
+
   document.getElementById('submit').addEventListener('click', handleButtonClick)
   const toggleButtons = document.querySelectorAll('.toggle-controls')
   if (toggleButtons) {
@@ -77,9 +90,6 @@ async function main() {
     window.addEventListener('resize', setToggleIcon); // Update icon on resize/orientation change
     setToggleIcon(); // Set initial icon
   }
-
-  document.getElementById('metrics').addEventListener('change', () => updateBadges('metrics', 'metrics-badge-container'));
-  document.getElementById('census-divisions').addEventListener('change', () => updateBadges('census-divisions', 'census-divisions-badge-container'));
 
   setupMultiSelect('metrics');
   setupMultiSelect('census-divisions');
@@ -507,4 +517,29 @@ function setToggleIcon() {
     const isCollapsed = controls.classList.contains('collapsed');
     toggleButtonUp.innerHTML = !isCollapsed ? '▲' : '▼';
     toggleButtonLeft.innerHTML = !isCollapsed ? '◀' : '▶';
+}
+
+function saveSelections(selectId) {
+  const selectElement = document.getElementById(selectId);
+  const selectedValues = Array.from(selectElement.selectedOptions).map(opt => opt.value);
+  localStorage.setItem(`selected_${selectId}`, JSON.stringify(selectedValues));
+}
+
+function loadSelections(selectId) {
+  const selectElement = document.getElementById(selectId);
+  if (!selectElement) return;
+
+  const savedValues = JSON.parse(localStorage.getItem(`selected_${selectId}`));
+
+  if (savedValues) {
+    Array.from(selectElement.options).forEach(option => {
+      if (savedValues.includes(option.value)) {
+        option.selected = true;
+      }
+    });
+
+    // Manually trigger change event to update badges
+    const changeEvent = new Event('change', { 'bubbles': true });
+    selectElement.dispatchEvent(changeEvent);
+  }
 }
