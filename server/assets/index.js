@@ -143,6 +143,12 @@ function calculateMinMax(data, metrics) {
 
   return minMaxValues;
 }
+function cleanCensusDivisionName(name) {
+  if (!name) return name;
+  return name
+    .replace(/, Regional District \(RD\)/ig, '')
+    .replace(/, Region \(REG\)/ig, '');
+}
 function sortBoundaryData(data) {
   const idIndexMap = {};
   selectedData.forEach((item, index) => {
@@ -157,6 +163,7 @@ function populateMetricsSelect(censusData, selectElementId) {
   const keysToDisplay = keys.filter(key => {
     const split = key.split("_")
     if (split[0] === "ethnicOrigin") return false
+    if (key === "familySize_couplesWithChildren_avg") return false
     switch (split[split.length-1]) {
       case "avg":
         return true
@@ -187,10 +194,10 @@ function populateCensusDivisionsSelect(censusData, selectElementId) {
 
   const selectElement = document.getElementById(selectElementId)
   censusDivisions.forEach(censusDivision => {
-    const option = document.createElement('option')
-    option.value = censusDivision
-    option.textContent = censusDivision
     if (censusDivision != null) {
+      const option = document.createElement('option')
+      option.value = censusDivision
+      option.textContent = cleanCensusDivisionName(censusDivision)
       selectElement.appendChild(option)
     }
   })
@@ -205,7 +212,7 @@ function populateLocationsSelect(data, selectElementId) {
   data.forEach(item => {
     const option = document.createElement('option')
     option.value = item.ALT_GEO_CODE
-    option.textContent = item.CENSUS_DIVISION_NAME ? `${item.GEO_NAME} (${item.CENSUS_DIVISION_NAME}) [${item.averageMetrics}]` : item.GEO_NAME
+    option.textContent = item.CENSUS_DIVISION_NAME ? `${item.GEO_NAME} (${cleanCensusDivisionName(item.CENSUS_DIVISION_NAME)}) [${item.averageMetrics}]` : item.GEO_NAME
     newSelectElement.appendChild(option)
   })
 
@@ -378,7 +385,7 @@ function buildTooltip(dauid) {
   // Build a tooltip that shows the relevant metrics plus a bit of meta
   const tooltipElement = document.getElementById('tooltip').cloneNode(true)
   tooltipElement.querySelectorAll('.DAID')[0].textContent = `ID: ${dauid}`
-  tooltipElement.querySelectorAll('.division')[0].textContent = `Division: ${da.CENSUS_DIVISION_NAME}`
+  tooltipElement.querySelectorAll('.division')[0].textContent = `Division: ${cleanCensusDivisionName(da.CENSUS_DIVISION_NAME)}`
 
   // Display selected metrics
   const selectedMetricsOptions = document.querySelectorAll(`#metrics option:checked`)
