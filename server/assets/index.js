@@ -80,9 +80,38 @@ async function main() {
 
   document.getElementById('metrics').addEventListener('change', () => updateBadges('metrics', 'metrics-badge-container'));
   document.getElementById('census-divisions').addEventListener('change', () => updateBadges('census-divisions', 'census-divisions-badge-container'));
+
+  setupMultiSelect('metrics');
+  setupMultiSelect('census-divisions');
 }
 main()
 
+function setupMultiSelect(selectId) {
+  const selectElement = document.getElementById(selectId);
+  if (!selectElement) return
+
+  selectElement.addEventListener('mousedown', function(e) {
+    if (e.button !== 0) return; // only for left-click
+
+    if (e.target.tagName === 'OPTION') {
+      e.preventDefault();
+
+      // Prevent browser from scrolling to the first selected item
+      const scrollTop = this.scrollTop;
+
+      e.target.selected = !e.target.selected;
+
+      // Manually trigger change event to update badges
+      const changeEvent = new Event('change', { 'bubbles': true });
+      this.dispatchEvent(changeEvent);
+
+      // Restore the original scroll position
+      setTimeout(() => {
+        this.scrollTop = scrollTop;
+      }, 0);
+    }
+  });
+}
 
 // Data functions
 async function getCensusData() {

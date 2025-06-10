@@ -51,6 +51,11 @@
         padding: 0 1em 1em 1em;
         height: 100%;
         overflow: auto;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none;  /* IE and Edge */
+      }
+      #controls-content::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, and Opera */
       }
       .toggle-controls {
         z-index: 3;
@@ -69,7 +74,7 @@
         top: 0;
         left: 0;
         width: 100%;
-        height: 58vh;
+        height: 70vh;
         overflow: auto;
       }
       #controls.collapsed {
@@ -77,7 +82,7 @@
       }
       #toggle-controls-up {
         position: absolute;
-        top: 58vh;
+        top: 70vh;
         left: 50%;
         transform: translateX(-50%);
         width: 60px;
@@ -157,7 +162,6 @@
           </div>
           <div id="metrics-badge-container" class="badge-container"></div>
           <select id="metrics" multiple size="7"></select>
-          <span class="pure-form-message">Select multiples by command-clicking or control-clicking</span>
 
           <div class="pure-g">
             <div class="pure-u-1 pure-u-md-1-2">
@@ -195,14 +199,13 @@
           </div>
           <div id="census-divisions-badge-container" class="badge-container"></div>
           <select id="census-divisions" multiple size="7"></select>
-          <span class="pure-form-message">Select multiples by command-clicking or control-clicking</span>
 
           <hr />
 
           <label for="location">Results (<span id="location-count"></span>)</label>
           <select id="location" class="hidden" onchange="handleLocationChange()" size="7"></select>
 
-          <button class="pure-button" id="submit">Show on Map</button>
+          <button class="pure-button" id="submit">Search</button>
         </fieldset>
       </div>
       <button type="button" id="toggle-controls-left" class="toggle-controls"></button>
